@@ -25,6 +25,7 @@ describe("[check-2] thesis exclusions never pass silently", () => {
 });
 describe("[check-4] portfolio conflicts", () => {
   it("an open conflict forces HOLD", () => expect(recommend({ ...base, scores: scores(6, 5), openConflicts: ["MeetRecord"] }).outcome).toBe("HOLD"));
+  it("an open conflict wins over missing evidence (found by the live eval)", () => expect(recommend({ ...base, scores: scores(2, 5), openConflicts: ["MeetRecord"] }).outcome).toBe("HOLD"));
 });
 describe("[check-3] evidence integrity", () => {
   it("injection / fabricated citation / identity mismatch flags block GO", () => {

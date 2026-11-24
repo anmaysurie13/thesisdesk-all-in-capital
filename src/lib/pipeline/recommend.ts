@@ -24,13 +24,15 @@ export function recommend(i: RecommendInput): { outcome: Outcome; weighted: numb
   const coverage = i.criteria.length ? scored.length / i.criteria.length : 0;
   const confidence = scored.length ? (scored.reduce((a, s) => a + s.confidence, 0) / scored.length) * coverage : 0;
 
+  // A possible portfolio conflict always goes to a partner first, whatever else is missing.
+  if (i.openConflicts.length) {
+    reasons.push(`Possible portfolio conflict with ${i.openConflicts.join(", ")} — partner clearance required.`);
+    if (scored.length < i.minScoredCriteria) reasons.push(`Also: only ${scored.length} of ${i.criteria.length} criteria had enough evidence.`);
+    return { outcome: "HOLD", weighted, confidence, reasons };
+  }
   if (scored.length < i.minScoredCriteria) {
     reasons.push(`Only ${scored.length} of ${i.criteria.length} criteria had enough evidence (minimum ${i.minScoredCriteria}).`);
     return { outcome: "REQUEST_INFO", weighted, confidence, reasons };
-  }
-  if (i.openConflicts.length) {
-    reasons.push(`Possible portfolio conflict with ${i.openConflicts.join(", ")} — partner clearance required.`);
-    return { outcome: "HOLD", weighted, confidence, reasons };
   }
   const blockers = i.flags.filter((f) => ["injection_suspected", "fabricated_citation", "identity_mismatch"].includes(f));
   if (blockers.length) {
