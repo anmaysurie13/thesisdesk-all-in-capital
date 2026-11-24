@@ -31,3 +31,7 @@ eval-results/raw/
 .vercel
 .env*
 !.env.example
+eval-results/backtest-*.json
+eval-results/volume-*.json
+eval-results/eval-*.md
+eval-results/vitest.json

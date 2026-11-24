@@ -1,4 +1,5 @@
 import { redirect } from "next/navigation";
+import { connection } from "next/server";
 import { signOut } from "@/auth";
 import { ROLE_LABEL } from "@/lib/authz";
 import { env } from "@/lib/env";
@@ -7,6 +8,7 @@ import { getPause } from "@/lib/state";
 import { Pill } from "./ui";
 
 export async function TopBar() {
+  await connection();
   const u = await currentUser();
   if (!u && process.env.OPEN_ACCESS === "false") redirect("/login");
   const e = env();
