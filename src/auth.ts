@@ -62,6 +62,8 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       return session;
     },
     authorized({ auth: s, request }) {
+      // OPEN_ACCESS: anyone may VIEW the dashboard; every mutation still requires a signed-in role (checked server-side).
+      if (process.env.OPEN_ACCESS !== "false") return true;
       const p = request.nextUrl.pathname;
       if (p.startsWith("/login") || p.startsWith("/api/auth") || p.startsWith("/api/webhooks") || p.startsWith("/api/worker") || p.startsWith("/api/health")) return true;
       if (p.startsWith("/api/v1")) return true; // token-authenticated harness API (checked in the route)

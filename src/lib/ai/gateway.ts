@@ -205,8 +205,10 @@ export async function callModel<T extends z.ZodType>(spec: CallSpec<T>): Promise
   }
   const end = new Date();
   const est = estimateCost(model, raw.inputTokens, raw.outputTokens);
-  const cost = raw.costUsd ?? est ?? 0;
-  const costSource = raw.costUsd != null ? "provider" : est != null ? "estimate" : "none";
+  // BYOK routes report cost 0 (billed by Google directly) — treat 0 with tokens as unknown and estimate.
+  const providerCost = raw.costUsd != null && (raw.costUsd > 0 || raw.inputTokens + raw.outputTokens === 0) ? raw.costUsd : null;
+  const cost = providerCost ?? est ?? 0;
+  const costSource = providerCost != null ? "provider" : est != null ? "estimate" : "none";
 
   let data: z.infer<T>;
   let status: "ok" | "invalid_output" = "ok";

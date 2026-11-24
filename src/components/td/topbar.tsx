@@ -8,7 +8,7 @@ import { Pill } from "./ui";
 
 export async function TopBar() {
   const u = await currentUser();
-  if (!u) redirect("/login");
+  if (!u && process.env.OPEN_ACCESS === "false") redirect("/login");
   const e = env();
   const pause = await getPause().catch(() => ({ paused: false, reason: "database unreachable" }));
   return (
@@ -26,15 +26,22 @@ export async function TopBar() {
           </Pill>
           <Pill tone="muted" title="Founder-data policy">Data: {e.DATA_MODE === "case_study" ? "case study only" : "real"}</Pill>
         </div>
-        <div className="flex items-center gap-3 text-[13px]">
-          <div className="text-right leading-tight">
-            <p className="font-medium text-primary">{u.name}</p>
-            <p className="text-[11px] text-muted-foreground">{ROLE_LABEL[u.role]}</p>
+        {u ? (
+          <div className="flex items-center gap-3 text-[13px]">
+            <div className="text-right leading-tight">
+              <p className="font-medium text-primary">{u.name}</p>
+              <p className="text-[11px] text-muted-foreground">{ROLE_LABEL[u.role]}</p>
+            </div>
+            <form action={async () => { "use server"; await signOut({ redirectTo: "/" }); }}>
+              <button className="rounded-md border px-2.5 py-1 text-xs hover:bg-muted">Sign out</button>
+            </form>
           </div>
-          <form action={async () => { "use server"; await signOut({ redirectTo: "/login" }); }}>
-            <button className="rounded-md border px-2.5 py-1 text-xs hover:bg-muted">Sign out</button>
-          </form>
-        </div>
+        ) : (
+          <div className="flex items-center gap-2 text-[13px]">
+            <Pill tone="muted" title="Viewing is open; decisions, sends and approvals need a signed-in role">Viewing as guest · read-only</Pill>
+            <a href="/login" className="rounded-md border px-2.5 py-1 text-xs hover:bg-muted">Team sign-in</a>
+          </div>
+        )}
       </div>
     </>
   );

@@ -1,0 +1,80 @@
+{
+  "runId": "b92bcce1-6637-4506-92f0-963cd05097db",
+  "total": 20,
+  "scored": 20,
+  "pending": 0,
+  "agreement": 0.4444444444444444,
+  "falseGo": 0,
+  "falsePass": 5,
+  "holds": 0,
+  "requestInfo": 11,
+  "disagreements": [
+    {
+      "rowRef": "L1-01",
+      "company": "Cartwheel Foods",
+      "predicted": "PASS",
+      "actual": "Go",
+      "adjudication": "pending"
+    },
+    {
+      "rowRef": "L1-05",
+      "company": "Marut Dynamics",
+      "predicted": "PASS",
+      "actual": "Go",
+      "adjudication": "pending"
+    },
+    {
+      "rowRef": "L1-07",
+      "company": "Brewline",
+      "predicted": "PASS",
+      "actual": "Go",
+      "adjudication": "pending"
+    },
+    {
+      "rowRef": "L1-09",
+      "company": "Dhaaga Direct",
+      "predicted": "REQUEST_INFO",
+      "actual": "Go",
+      "adjudication": "pending"
+    },
+    {
+      "rowRef": "L1-23",
+      "company": "Tarazu Pay",
+      "predicted": "REQUEST_INFO",
+      "actual": "Go",
+      "adjudication": "pending"
+    },
+    {
+      "rowRef": "L1-25",
+      "company": "Sehat Sathi",
+      "predicted": "PASS",
+      "actual": "Go",
+      "adjudication": "pending"
+    },
+    {
+      "rowRef": "L1-27",
+      "company": "Riwaaz Rentals",
+      "predicted": "PASS",
+      "actual": "Go",
+      "adjudication": "pending"
+    },
+    {
+      "rowRef": "L1-37",
+      "company": "Anaaj Anytime",
+      "predicted": "REQUEST_INFO",
+      "actual": "Go",
+      "adjudication": "pending"
+    },
+    {
+      "rowRef": "L1-39",
+      "company": "Bolt Bazaar",
+      "predicted": "REQUEST_INFO",
+      "actual": "Go",
+      "adjudication": "pending"
+    }
+  ],
+  "thesisVersion": 0,
+  "split": "tune",
+  "costUsd": 0,
+  "modelCalls": 100
+}

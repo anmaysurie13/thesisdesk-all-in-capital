@@ -63,6 +63,8 @@ export async function scoreCorrectionAction(_: ActionResult | null, fd: FormData
 }
 
 export async function reviewTimerAction(applicationId: string, openedAtIso: string, seconds: number) {
+  const { currentUser } = await import("@/lib/session");
+  if (!(await currentUser())) return; // guests' viewing time is not a review
   const u = await requirePermission("view");
   if (seconds <= 0 || seconds > 4 * 3600) return;
   await db().insert(reviewTimings).values({ applicationId, userId: u.id, openedAt: new Date(openedAtIso), closedAt: new Date(), seconds: Math.round(seconds) });

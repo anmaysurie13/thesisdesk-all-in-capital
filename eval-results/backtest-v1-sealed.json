@@ -1,0 +1,80 @@
+{
+  "runId": "3e8e83a3-cf59-4560-9f51-f762a61bf6ee",
+  "total": 20,
+  "scored": 20,
+  "pending": 0,
+  "agreement": 0.8333333333333334,
+  "falseGo": 0,
+  "falsePass": 2,
+  "holds": 6,
+  "requestInfo": 2,
+  "disagreements": [
+    {
+      "rowRef": "L1-06",
+      "company": "PeerPay Rural",
+      "predicted": "PASS",
+      "actual": "Go",
+      "adjudication": "pending"
+    },
+    {
+      "rowRef": "L1-08",
+      "company": "Notely Calls",
+      "predicted": "HOLD",
+      "actual": "No-go",
+      "adjudication": "pending"
+    },
+    {
+      "rowRef": "L1-14",
+      "company": "Atta Direct",
+      "predicted": "HOLD",
+      "actual": "Go",
+      "adjudication": "pending"
+    },
+    {
+      "rowRef": "L1-16",
+      "company": "Khet Kosh",
+      "predicted": "PASS",
+      "actual": "Go",
+      "adjudication": "pending"
+    },
+    {
+      "rowRef": "L1-22",
+      "company": "Samarth Kirana",
+      "predicted": "HOLD",
+      "actual": "Go",
+      "adjudication": "pending"
+    },
+    {
+      "rowRef": "L1-30",
+      "company": "Hundi Hub",
+      "predicted": "REQUEST_INFO",
+      "actual": "Go",
+      "adjudication": "pending"
+    },
+    {
+      "rowRef": "L1-32",
+      "company": "Cheema Cabs",
+      "predicted": "HOLD",
+      "actual": "Go",
+      "adjudication": "pending"
+    },
+    {
+      "rowRef": "L1-34",
+      "company": "Gaonwala Pay",
+      "predicted": "HOLD",
+      "actual": "Go",
+      "adjudication": "pending"
+    },
+    {
+      "rowRef": "L1-36",
+      "company": "ChainRupee",
+      "predicted": "HOLD",
+      "actual": "No-go",
+      "adjudication": "pending"
+    }
+  ],
+  "thesisVersion": 1,
+  "split": "sealed",
+  "costUsd": 0.4712,
+  "modelCalls": 100
+}
