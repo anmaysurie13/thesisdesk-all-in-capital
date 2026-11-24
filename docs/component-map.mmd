@@ -1,0 +1,90 @@
+%% ThesisDesk — All In Capital · Component map (Actor → Trigger → Input → Context → Processing → AI → Output)
+%% Editable source. Render: npx @mermaid-js/mermaid-cli -i docs/component-map.mmd -o docs/component-map.png -w 3200 -b "#F5F3EC"
+%%{init: {"flowchart": {"curve": "basis", "nodeSpacing": 28, "rankSpacing": 40}, "themeVariables": {"clusterBkg": "#FBFAF6", "clusterBorder": "#638B74", "fontFamily": "Inter, Arial"}}}%%
+flowchart TB
+  classDef human fill:#DFE8E1,stroke:#183B32,color:#183B32,stroke-width:2px
+  classDef ai fill:#EFE6F5,stroke:#6B4C8A,color:#3B2A4F
+  classDef sys fill:#E6EEF5,stroke:#284B66,color:#1D3547
+  classDef ctx fill:#FAF1DE,stroke:#C49A51,color:#5C4415
+  classDef gate fill:#183B32,stroke:#C49A51,color:#F5F3EC,stroke-width:3px
+  classDef fail fill:#F8E5E1,stroke:#A63D32,color:#7C2A21
+  classDef infra fill:#FBFAF6,stroke:#638B74,color:#183B32
+
+  subgraph L1["LOOP 1 · SCREENING"]
+    direction LR
+    A1([Riya / Analyst<br/>single or batch upload]):::human --> I1[Intake API<br/>validate · content-hash dedupe]:::sys
+    I1 -->|missing / corrupt| F1[Retained as INVALID<br/>with reason]:::fail
+    I1 -->|duplicate| F2[Retained as DUPLICATE<br/>linked to original]:::fail
+    I1 -->|ONE transaction| Q1[(Neon queue<br/>application + job)]:::sys
+    Q1 --> W1[Worker tick<br/>SKIP LOCKED claim · lease · 5/min]:::sys
+    W1 --> P1[Parse PDF → redact PII<br/>founder IDs F1, F2]:::sys
+    P1 --> E1[Eligibility rules<br/>stage · sector · exclusions]:::sys
+    E1 --> C1{{Extract founder claims}}:::ai
+    C1 --> R1[Tavily research<br/>public identifiers only · credit budget]:::sys
+    R1 -->|budget / unconfigured| G1[Gap named:<br/>claims stay unverified]:::fail
+    R1 --> V1{{Verify evidence<br/>identity · recency · contradictions}}:::ai
+    V1 --> PF{{Portfolio overlap}}:::ai
+    PF -->|overlap| CF[Conflict OPEN →<br/>partner clearance]:::fail
+    CTX1[/Active approved thesis<br/>criteria · weights · exclusions/]:::ctx --> S1
+    CTX2[/Approved corrections<br/>point-in-time · newest wins/]:::ctx --> S1
+    CTX3[/Top-3 memo passages/]:::ctx --> S1
+    PF --> S1{{Criterion-wise scoring<br/>cited refs · unknowns · confidence}}:::ai
+    S1 -->|fake / missing refs| FC[Score → insufficient<br/>flag fabricated_citation]:::fail
+    S1 --> RC[Recommendation IN CODE<br/>GO / PASS / HOLD / REQUEST INFO]:::sys
+    RC --> B1{{Cited investment brief<br/>claims vs verified facts · gaps}}:::ai
+    B1 --> H1[Riya review<br/>overturn needs a reason]:::gate
+    H1 -->|deeptech / hardware| H2[Aditya technical review]:::gate
+    H1 --> H3[Kushal sign-off<br/>GO blocked while conflict open]:::gate
+    H2 --> H3
+  end
+
+  subgraph L2["LOOP 2 · OUTREACH & SCHEDULING"]
+    direction LR
+    H3 -->|GO only · HOLD blocks| D2{{Draft first email<br/>Riya's style memory · first_name placeholder}}:::ai
+    CAL1[/Calendly free slots<br/>30-min event/]:::ctx --> D2
+    D2 --> H4[Riya edits + ticks confirm<br/>server gate: GO · not suppressed]:::gate
+    H4 --> M1{Email mode}:::sys
+    M1 -->|simulate default| SIM[Recorded SIMULATED]:::sys
+    M1 -->|test / live| RS[Resend send<br/>idempotency key · atomic claim]:::sys
+    RS --> WH[Svix-verified webhooks<br/>delivered · bounced · received · dedupe]:::sys
+    WH -->|bounce| ST[Stop + suppress]:::fail
+    WH -->|reply| RCL{{Classify reply}}:::ai
+    MAN[Manual reply entry<br/>labelled manual]:::human --> RCL
+    RCL -->|decline| ST
+    RCL -->|ambiguous / injection| HU[Stop automation → Riya]:::fail
+    RCL -->|interested / needs info / reschedule| D3{{Draft response}}:::ai
+    D3 --> H4
+    FU[Follow-up scan D+3, D+7<br/>max 2 · stops on any reply]:::sys --> D4{{Draft follow-up}}:::ai --> H4
+    RS --> LINK[Personal Calendly link<br/>utm thread id, no PII]:::sys
+    LINK --> CB[Calendly webhook / 15-min poll]:::sys
+    CB -->|confirmed by Calendly| MB[Meeting BOOKED<br/>unique per app: no double booking]:::sys
+    CB -->|counter-proposal > 2| HU
+    MB --> CO[Call outcome + notes]:::human
+  end
+
+  subgraph L3["LOOP 3 · LEARNING & MEMORY"]
+    direction LR
+    H1 -->|overturn reason| MEM1[Proposed correction]:::sys
+    H4 -->|draft vs sent| MEM2[Email-edit style memory]:::sys
+    CO --> CS{{Summarise call → learnings}}:::ai --> MEM1
+    MEM1 --> HP[Partner approves corrections]:::gate --> CTX2
+    TH[Propose thesis vN<br/>weights · thresholds]:::human --> BT[Point-in-time backtest<br/>Riya's call hidden · tune / sealed split]:::sys
+    BT --> ADJ[Disagreements → human adjudication<br/>agreement · false GO / PASS]:::human
+    ADJ --> HT[Kushal approves + activates<br/>rollback = re-activate]:::gate --> CTX1
+  end
+
+  subgraph OPS["PRODUCTION CONTROLS (cross-cutting)"]
+    direction TB
+    GW[AI gateway · only door to the model<br/>PII guard · cache key = input+evidence+thesis+prompt+model]:::infra
+    PK[Portkey → OpenRouter → Gemini<br/>retry 3× exp. backoff · one retry layer]:::infra
+    QT[Quota & cost guard<br/>$/day · $/month · calls/day · RPM]:::infra
+    QT -->|cap hit| PA[PAUSE system + alert<br/>jobs parked, not lost · safe resume]:::fail
+    LF[Langfuse traces<br/>trace per job · span per step · generation per call]:::infra
+    LG[(Ledger: model_calls<br/>app · run · prompt version · tokens · latency · retries · cost)]:::infra
+    JB[Jobs: 3 attempts → NEEDS ATTENTION with reason]:::fail
+    AU[(Audit log · role checks on every action)]:::infra
+    GW --> QT --> PK --> LG --> LF
+  end
+
+  C1 & V1 & PF & S1 & B1 & D2 & RCL & D3 & D4 & CS -.-> GW
+  W1 -.->|failure| JB

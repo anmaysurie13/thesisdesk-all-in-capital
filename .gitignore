@@ -1,0 +1,29 @@
+# secrets
+.seed-credentials.local
+.env
+.env*.local
+.env.production
+.env.development
+
+# confidential case data — never commit
+_source_materials/
+data/private/
+seed/private/
+*.pdf
+*.xlsx
+*.csv
+!evals/fixtures/**/*.csv
+
+# build
+node_modules/
+.next/
+out/
+coverage/
+.vercel
+*.tsbuildinfo
+next-env.d.ts
+
+# misc
+.DS_Store
+*.log
+eval-results/raw/
