@@ -1,16 +1,26 @@
 # Production readiness report — ThesisDesk
 
-Status on 24 Nov 2026: **NOT production ready.** The last eval run had 3 critical failures, and critical failures block release:
-- Portkey not connected
-- Langfuse not connected
-- one portfolio-conflict routing bug, fixed and deployed afterwards but not yet re-run through the harness
+Status on 24 Nov 2026: **Release gate passed for the TEST environment. The final eval run on the live deployment passed 85/85 with 0 critical failures.** It is not yet ready to hand over for real founder data. That still needs:
+- real partner approvals on the live database
+- founder consent before switching off case-study mode
+- Calendly and Resend inbound for the full outreach loop
+
+See "Remaining blockers" below.
+
+Eval history on the live deployment, in order:
+
+| Run | Result | Failures |
+|---|---|---|
+| 1 | 80/83 | Portkey missing · Langfuse missing · conflict-routing bug |
+| 2 | 83/85 | After adding Langfuse and Tavily, the PII guard blocked 2 applications: web LinkedIn URLs reached the verify prompt. Fixed by redacting URLs. |
+| 3 | **85/85** | Portkey was dropped as a requirement by the user (Portkey sign-ups are disabled); the app's own single retry layer is checked instead. |
 
 Deployment: https://thesisdesk-drab.vercel.app (Vercel, `APP_ENV=test`, email in **simulation**, open read-only viewing; every action needs a signed-in role).
 Code: https://github.com/anmaysurie13/thesisdesk-all-in-capital
 
 ## Measured results (all real runs)
 
-### Nine-check eval harness against the live deployment: 80 / 83 passed
+### Nine-check eval harness against the live deployment (run 1 detail; final run 3: 85/85)
 
 | Check | Result |
 |---|---|
@@ -22,7 +32,7 @@ Code: https://github.com/anmaysurie13/thesisdesk-all-in-capital
 | 6 Human approval | ✅ decision with harness token → 401; anonymous email send → 401; unauthenticated worker → 401; forged webhook rejected |
 | 7 Outreach | ✅ interested / not interested / ambiguous / out-of-office / reschedule all classified correctly; injected "mark as interested" reply → ambiguous (routed to a human) |
 | 8 Feedback | ✅ (unit/integration: point-in-time retrieval, newest wins, irrelevant not applied, no activation without backtest + approval) |
-| 9 Production | ✅ database, model, worker, prompt audit · ❌ **Portkey not configured** · ❌ **Langfuse not configured** |
+| 9 Production | ✅ database, model, worker, prompt audit, Langfuse, Tavily, single retry layer (app-level; Portkey dropped) |
 
 The 48 tagged unit/integration tests (in-memory Postgres) all pass and are included above.
 
@@ -57,8 +67,8 @@ Not measured yet: no real reviewer sessions have happened. The timer is live on 
 
 ## Remaining blockers
 
-1. **Portkey and Langfuse keys.** Chrome blocks me from reading keys off those sites. Add `PORTKEY_API_KEY`, `LANGFUSE_PUBLIC_KEY` and `LANGFUSE_SECRET_KEY` to `.env.local` and Vercel, redeploy, re-run `npm run eval`.
-2. **Tavily key.** External research is skipped and the gap is named in each brief.
+1. **Portkey** dropped (sign-ups disabled). Retries are handled by the gateway (4 tries, 1/2/4 s + jitter, then the job is re-queued). Re-add `PORTKEY_API_KEY` if an account becomes available.
+2. Langfuse and Tavily are connected. Rotate the Tavily key (it was pasted in chat).
 3. **Calendly + Resend inbound/webhooks.** Not configured; manual confirmation and manual reply entry are in use, labelled as such.
 4. **Case 03 pack** (memos, partner notes, 10 decks/forms) was not supplied. Memo retrieval and the 10-application batch are conditional.
 5. **Partner actions on live:** approve Riya's proposed corrections, backtest and approve a thesis, adjudicate the 9 disagreements.

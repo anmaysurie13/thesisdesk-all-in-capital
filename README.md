@@ -17,7 +17,7 @@ Pages: Overview · Deal Inbox · Evidence Room · Partner Review · Founder Desk
 
 ## Stack
 
-Next.js 16 (App Router, Cache Components) · TypeScript · Tailwind 4 · shadcn/ui (Base UI) · Neon Postgres + Drizzle · Auth.js v5 credentials (bcrypt, lockout, roles) · Gemini via OpenRouter, routed through **Portkey** (retries) · **Langfuse** (ingestion API, trace per job, span per step, generation per model call) · Tavily · Resend · Calendly · Vercel · GitHub Actions.
+Next.js 16 (App Router, Cache Components) · TypeScript · Tailwind 4 · shadcn/ui (Base UI) · Neon Postgres + Drizzle · Auth.js v5 credentials (bcrypt, lockout, roles) · Gemini via OpenRouter with a single gateway retry layer (Portkey optional — sign-ups disabled) · **Langfuse** (ingestion API, trace per job, span per step, generation per model call) · Tavily · Resend · Calendly · Vercel · GitHub Actions.
 
 > **Model access is paid.** At the user's instruction the build uses their OpenRouter key, and no Gemini model on OpenRouter is free (checked 24 Nov 2026). Spend is capped in code ($1/day, $15/month, 800 calls/day by default). Hitting a cap pauses the system and raises an alert; there is no fallback model. Every request sends `provider.data_collection: "deny"`.
 
