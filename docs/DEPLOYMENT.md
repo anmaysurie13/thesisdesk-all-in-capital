@@ -17,6 +17,6 @@
    - Add every variable from `.env.example`, using separate values for Preview (test) and Production (live).
    - Set `APP_ENV=test` on Preview and `APP_ENV=live` on Production.
    - Deploy with `npx vercel --prod`. The daily cron in `vercel.json` calls `/api/worker/tick` with `CRON_SECRET`.
-9. **GitHub Actions worker.** In the repository secrets, set `APP_URL` and `WORKER_SECRET`. The workflow ticks the worker every 5 minutes.
+9. **GitHub Actions worker.** Create `.github/workflows/worker.yml` in the GitHub web editor from `docs/github-worker.yml` (the CLI token lacks the `workflow` scope). In the repository secrets, set `APP_URL` and `WORKER_SECRET`. The workflow ticks the worker every 5 minutes.
 10. **Release gate.** Run `npm run eval -- --target <preview-url>` and `npm run volume -- --target <preview-url> --scenario 20`. Any critical failure blocks release.
 11. **Live email.** Switch `EMAIL_MODE=live` only after explicit written authorisation.
