@@ -154,7 +154,8 @@ async function stepVerify(c: Ctx) {
   const cl = await db().select().from(claims).where(eq(claims.applicationId, c.app.id));
   if (!cl.length) return { skipped: true, note: "No claims to verify" };
   const fs = await loadFounders(c.app.id);
-  const evInput = ev.map((e) => ({ ref: e.ref, type: e.sourceType, date: e.publishedAt, stale: e.stale, url: e.url, excerpt: redact(e.excerpt, forbidden(fs)).slice(0, 600) }));
+  // URLs are redacted too: web results often include LinkedIn profiles (possible founder PII) and contact links.
+  const evInput = ev.map((e) => ({ ref: e.ref, type: e.sourceType, date: e.publishedAt, stale: e.stale, url: e.url ? redact(e.url, forbidden(fs)) : null, excerpt: redact(e.excerpt, forbidden(fs)).slice(0, 600) }));
   const { data } = await callModel({
     promptKey: verifyPrompt.key, promptVersion: verifyPrompt.version, tier: "fast", system: verifyPrompt.system,
     user: verifyPrompt.user(c.app.companyName, cl.map((x) => ({ key: x.claimKey, text: x.text, metric: x.metric, value: x.value })), evInput),

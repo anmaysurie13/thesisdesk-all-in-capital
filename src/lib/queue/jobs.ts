@@ -89,8 +89,9 @@ export async function fail(job: Job, reason: string, retryable: boolean) {
     updatedAt: new Date(),
   }).where(eq(jobs.id, job.id));
   if (exhausted && job.applicationId) {
+    const [cur] = await db().select({ step: jobs.step }).from(jobs).where(eq(jobs.id, job.id));
     await db().update(applications)
-      .set({ status: "needs_attention", statusReason: `${job.step ?? job.kind}: ${reason}`.slice(0, 500), updatedAt: new Date() })
+      .set({ status: "needs_attention", statusReason: `${cur?.step ?? job.kind}: ${reason}`.slice(0, 500), updatedAt: new Date() })
       .where(eq(applications.id, job.applicationId));
   }
   return exhausted;

@@ -1,6 +1,6 @@
 # Prompt audit
 
-Generated 2026-11-24T16:06:00.158Z from synthetic data (no real founder data).
+Generated 2026-11-24T16:41:25.826Z from synthetic data (no real founder data).
 
 | Prompt | Version | ~Tokens | PII found | What is sent |
 |---|---|---|---|---|
