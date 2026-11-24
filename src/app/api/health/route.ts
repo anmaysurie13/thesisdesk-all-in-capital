@@ -16,5 +16,7 @@ export async function GET() {
     database = false;
   }
   const i = integrations();
-  return NextResponse.json({ ok: database, env: env().APP_ENV, emailMode: env().EMAIL_MODE, paused, integrations: { ...i, database } }, { status: database ? 200 : 503 });
+  // Exactly one retry layer is always active: Portkey when configured, otherwise the gateway's own (4 tries, 1/2/4 s + jitter).
+  const retryLayer = i.portkey ? "portkey" : "app";
+  return NextResponse.json({ ok: database, env: env().APP_ENV, emailMode: env().EMAIL_MODE, paused, retryLayer, integrations: { ...i, database } }, { status: database ? 200 : 503 });
 }
