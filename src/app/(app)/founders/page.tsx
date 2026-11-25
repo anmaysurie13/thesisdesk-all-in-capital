@@ -19,11 +19,13 @@ export default async function FounderDesk() {
   return (
     <>
       <PageHeader kicker="Loop 2 · Outreach" title="Founder Desk" description="Drafts appear only after a partner GO. Nothing is sent until Riya edits, ticks the confirmation and presses Send." />
-      <div className="mb-4 space-y-2">
-        {e.EMAIL_MODE === "simulate" && <Notice tone="info"><b>Simulation mode.</b> Pressing Send records the email as <i>simulated</i>; nothing leaves the system. Live sending must be authorised explicitly (EMAIL_MODE=live) and needs a verified domain.</Notice>}
-        {e.EMAIL_MODE === "test" && <Notice tone="warn"><b>Test mode.</b> Emails go only to the test inbox allow-list, never to founders.</Notice>}
-        {!i.resendWebhook && <Notice tone="warn">Inbound replies: Resend webhook secret not configured — use <b>manual reply entry</b> below (labelled as manual).</Notice>}
-      </div>
+      {/* Email mode is shown in the top bar on every page; here we only flag live sending, and the reply limitation once threads exist. */}
+      {(e.EMAIL_MODE === "live" || (threads.length > 0 && !i.resendWebhook)) && (
+        <div className="mb-4 space-y-2">
+          {e.EMAIL_MODE === "live" && <Notice tone="bad"><b>Live sending.</b> Approved emails go to founders.</Notice>}
+          {threads.length > 0 && !i.resendWebhook && <p className="text-xs text-muted-foreground">Founder replies aren&apos;t synced automatically yet — paste them with “Enter a reply manually”.</p>}
+        </div>
+      )}
       {threads.length === 0 ? <Empty title="No outreach yet">A thread opens when Kushal signs off an application as GO.</Empty> : (
         <div className="space-y-4">
           {threads.map(({ t, ref, company, emails }) => (
