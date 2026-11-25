@@ -2,31 +2,23 @@ import { connection } from "next/server";
 import { eq } from "drizzle-orm";
 import { db } from "@/db";
 import { applications, outreachThreads } from "@/db/schema";
-import { callOutcomeAction, manualMeetingAction, opsAction } from "@/app/actions";
+import { callOutcomeAction, manualMeetingAction } from "@/app/actions";
 import { ActionForm, inputCls, Submit } from "@/components/td/action-form";
-import { Empty, fmtDate, Notice, PageHeader, Panel, Pill, StatusPill, Table } from "@/components/td/ui";
+import { Empty, fmtDate, PageHeader, Panel, Pill, StatusPill, Table } from "@/components/td/ui";
 import { can } from "@/lib/authz";
-import { integrations } from "@/lib/env";
 import { meetingRows } from "@/lib/queries";
 import { currentUser } from "@/lib/session";
 
 export default async function Meetings() {
   await connection();
   const u = await currentUser();
-  const i = integrations();
   const rows = await meetingRows();
   const awaiting = await db().select({ id: outreachThreads.id, company: applications.companyName }).from(outreachThreads)
     .innerJoin(applications, eq(applications.id, outreachThreads.applicationId)).where(eq(outreachThreads.status, "replied"));
   return (
     <>
-      <PageHeader kicker="Loop 2 · Scheduling" title="Meetings" description="A meeting counts as booked only when Calendly confirms it (webhook or polling). Manual confirmations are labelled as such.">
-        <ActionForm action={opsAction} hidden={{ op: "tick" }}><Submit variant="outline">Poll Calendly now</Submit></ActionForm>
-      </PageHeader>
-      <div className="mb-4 space-y-2">
-        {!i.calendly && <Notice tone="warn">Calendly is not configured (CALENDLY_PAT, CALENDLY_EVENT_TYPE_URI). Emails use generic slots and bookings can only be confirmed manually.</Notice>}
-        {i.calendly && !i.calendlyWebhook && <Notice tone="info">Calendly webhooks not configured — bookings are picked up by polling every 15 minutes.</Notice>}
-      </div>
-      {rows.length === 0 ? <Empty title="No meetings yet">A scheduling link goes out with every approved GO email.</Empty> : (
+      <PageHeader kicker="Loop 2 · Scheduling" title="Meetings" description="Founder calls and their outcomes. Meetings are confirmed manually and labelled as such." />
+      {rows.length === 0 ? <Empty title="No meetings yet">Meetings appear here once Riya confirms a call with a founder.</Empty> : (
         <Table head={["Company", "Status", "When (IST)", "Confirmed via", "Counter-proposals", "Outcome"]}>
           {rows.map(({ m, company, ref }) => (
             <tr key={m.id}>
