@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
-  Activity, BookOpenCheck, CalendarClock, FlaskConical, Gauge, Inbox, LayoutDashboard, Mail, Settings, Scale, Wallet,
+  BookOpenCheck, CalendarClock, FlaskConical, Gauge, Inbox, LayoutDashboard, Mail, Settings, Scale, Wallet,
 } from "lucide-react";
 import { cn } from "cn";
 
@@ -15,7 +15,6 @@ export const NAV = [
   { href: "/meetings", label: "Meetings", icon: CalendarClock },
   { href: "/thesis", label: "Thesis & Memory", icon: BookOpenCheck },
   { href: "/evals", label: "Evaluations", icon: FlaskConical },
-  { href: "/health", label: "System Health", icon: Activity },
   { href: "/costs", label: "Cost Centre", icon: Wallet },
   { href: "/settings", label: "Settings", icon: Settings },
 ];

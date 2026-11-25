@@ -2,9 +2,12 @@ import { connection } from "next/server";
 import { asc } from "drizzle-orm";
 import { db } from "@/db";
 import { users, ROLES } from "@/db/schema";
-import { deactivateUserAction, userAction } from "@/app/actions";
+import { deactivateUserAction, opsAction, userAction } from "@/app/actions";
+import { eq, desc } from "drizzle-orm";
+import { applications, jobs } from "@/db/schema";
+import { getPause } from "@/lib/state";
 import { ActionForm, inputCls, Submit } from "@/components/td/action-form";
-import { PageHeader, Panel, Pill, Table } from "@/components/td/ui";
+import { fmtDate, Notice, PageHeader, Panel, Pill, Table } from "@/components/td/ui";
 import { can, PERMISSIONS, ROLE_LABEL } from "@/lib/authz";
 import { env, integrations } from "@/lib/env";
 import { currentUser } from "@/lib/session";
@@ -16,6 +19,10 @@ export default async function Settings() {
   const i = integrations();
   const team = await db().select({ id: users.id, name: users.name, email: users.email, role: users.role, active: users.active }).from(users).orderBy(asc(users.name));
   const manage = !!u && can(u.role, "manage_users");
+  const ops = !!u && can(u.role, "operate_system");
+  const pause = await getPause();
+  const stuck = await db().select({ id: jobs.id, kind: jobs.kind, step: jobs.step, lastError: jobs.lastError, company: applications.companyName, ref: applications.ref })
+    .from(jobs).leftJoin(applications, eq(applications.id, jobs.applicationId)).where(eq(jobs.status, "needs_attention")).orderBy(desc(jobs.updatedAt)).limit(20);
   const config: [string, string][] = [
     ["Environment", e.APP_ENV], ["Data mode", e.DATA_MODE], ["Email mode", e.EMAIL_MODE],
     ["Primary model", e.GEMINI_MODEL_PRIMARY], ["Fast model", e.GEMINI_MODEL_FAST], ["Judge model", e.GEMINI_MODEL_JUDGE],
@@ -26,6 +33,26 @@ export default async function Settings() {
   return (
     <>
       <PageHeader kicker="Admin" title="Settings" description="Configuration is read from environment variables on the server; secrets are never displayed. Changing a value means updating it in Vercel and redeploying, so every change is deliberate and logged." />
+      <Panel title="Operations" subtitle="Pause or resume the system, run the queue now, and retry applications that need attention" className="mb-4">
+        {pause.paused ? <div className="mb-3"><Notice tone="bad">Paused since {fmtDate(pause.since)} — {pause.reason}. Resuming re-queues parked work; nothing was lost.</Notice></div> : <p className="mb-3 text-[13px] text-muted-foreground">System running.</p>}
+        {ops ? (
+          <div className="mb-3 flex flex-wrap gap-2">
+            {pause.paused
+              ? <ActionForm action={opsAction} hidden={{ op: "resume" }}><Submit variant="gold">Resume system</Submit></ActionForm>
+              : <ActionForm action={opsAction} hidden={{ op: "pause" }} className="flex gap-1"><input name="reason" placeholder="Reason" className={`${inputCls} w-44`} /><Submit variant="danger">Pause</Submit></ActionForm>}
+            <ActionForm action={opsAction} hidden={{ op: "tick" }}><Submit variant="outline">Run queue now</Submit></ActionForm>
+          </div>
+        ) : <p className="mb-3 text-xs text-muted-foreground">Sign in as a team member to pause, resume or retry.</p>}
+        {stuck.length === 0 ? <p className="text-[13px] text-muted-foreground">Nothing needs attention.</p> : (
+          <ul className="divide-y text-[13px]">{stuck.map((j) => (
+            <li key={j.id} className="flex flex-wrap items-center gap-2 py-2">
+              <Pill tone="bad">needs attention</Pill><b>{j.company ?? j.kind}</b><span className="font-mono text-[11px]">{j.ref}</span>
+              <span className="text-muted-foreground">step {j.step ?? "—"} · {j.lastError}</span>
+              {ops && <ActionForm action={opsAction} hidden={{ op: "retry", jobId: j.id }} className="ml-auto"><Submit variant="outline">Retry</Submit></ActionForm>}
+            </li>))}
+          </ul>
+        )}
+      </Panel>
       <div className="grid gap-4 lg:grid-cols-2">
         <Panel title="Team & roles">
           <Table head={["Name", "Email", "Role", "Status", ""]}>

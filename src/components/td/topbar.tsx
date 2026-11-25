@@ -17,7 +17,7 @@ export async function TopBar() {
     <>
       {pause.paused && (
         <div role="alert" className="bg-destructive px-6 py-2 text-[13px] font-medium text-white">
-          System paused — {pause.reason}. Queued work is safe and resumes from System Health.
+          System paused — {pause.reason}. Queued work is safe and resumes from Settings → Operations.
         </div>
       )}
       <div className="flex h-14 items-center justify-between gap-3 border-b bg-card/70 px-4 backdrop-blur md:px-8">

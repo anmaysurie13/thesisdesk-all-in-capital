@@ -30,7 +30,7 @@ export default async function Costs() {
         <Stat label="Tavily credits" value={`${c.tavily?.credits ?? 0} / ${e.TAVILY_MONTHLY_CREDIT_CAP}`} hint={`${c.tavily?.skipped ?? 0} research runs skipped (budget/unconfigured)`} />
         <Stat label="Resend sends today" value={`${c.resendToday} / 100`} hint="free plan: 100/day incl. inbound" />
       </div>
-      {(c.sources?.blocked ?? 0) > 0 && <div className="mt-3"><Notice tone="bad">{c.sources?.blocked} model call(s) were blocked by a quota cap this month. See <Link href="/health" className="underline">System Health</Link>.</Notice></div>}
+      {(c.sources?.blocked ?? 0) > 0 && <div className="mt-3"><Notice tone="bad">{c.sources?.blocked} model call(s) were blocked by a quota cap this month. Resume it under <Link href="/settings" className="underline">Settings → Operations</Link>.</Notice></div>}
 
       <div className="mt-4 grid gap-4 lg:grid-cols-2">
         <Panel title="Per application (this month)" subtitle="Most expensive first">

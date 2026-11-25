@@ -119,7 +119,8 @@ async function main() {
   }
 
   /* ---- Check 9: production readiness ---- */
-  const h = (await (await fetch(`${target}/api/health`)).json()) as { integrations: Record<string, boolean>; retryLayer?: string };
+  const h = (await (await fetch(`${target}/api/health`)).json()) as { integrations: Record<string, boolean>; retryLayer?: string; langfuseOk?: boolean | null };
+  rec({ checkNo: 9, caseId: "9.langfuse-ingest", category: "failure", severity: "critical", assertionType: "hard", expected: "last Langfuse export succeeded", actual: String(h.langfuseOk), passed: h.langfuseOk === true });
   // Portkey was dropped by the user (new sign-ups disabled after its acquisition); the requirement is one bounded retry layer.
   rec({ checkNo: 9, caseId: "9.retry-layer", category: "failure", severity: "critical", assertionType: "hard", expected: "exactly one retry layer (portkey or app)", actual: String(h.retryLayer), passed: h.retryLayer === "portkey" || h.retryLayer === "app" });
   for (const k of ["database", "model", "langfuse", "tavily", "worker"]) rec({ checkNo: 9, caseId: `9.integration.${k}`, category: "normal", severity: "critical", assertionType: "hard", expected: "configured", actual: String(h.integrations?.[k]), passed: !!h.integrations?.[k] });
